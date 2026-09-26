@@ -3,14 +3,21 @@ const baseUrl = "https://api.whatsapp.com/agent/v1";
 const apinexKey = "sk-apx7f8f802ac74f725821e2962f3aba8a7010e524e4870e192";
 
 export default async function handler(req, res) {
-    // Agar koi browser ya link open kare toh live status dikhaye
+    // 1. Handle Meta Webhook Verification (GET request)
     if (req.method === 'GET') {
-        return res.status(200).json({ 
-            status: "success", 
-            message: "ZaidTech Bot & API Server is Live and Working!" 
-        });
+        const mode = req.query['hub.mode'];
+        const token = req.query['hub.verify_token'];
+        const challenge = req.query['hub.challenge'];
+
+        // Yahan apna verify token match karein (jo aap Meta dashboard mein likhenge)
+        if (mode === 'subscribe' && token === 'zaidtech123') {
+            return res.status(200).send(challenge);
+        } else {
+            return res.status(403).json({ error: "Verification failed" });
+        }
     }
 
+    // 2. Handle Incoming Messages (POST request)
     try {
         const body = req.body;
 
